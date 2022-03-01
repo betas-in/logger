@@ -20,19 +20,21 @@ type CLILoggerExec struct {
 }
 
 var (
-	// bold        = color.New(color.Bold).SprintfFunc()
-	// white       = color.New(color.FgWhite).SprintfFunc()
-	// whiteBold   = color.New(color.FgWhite, color.Bold).SprintfFunc()
-	yellow = color.New(color.FgYellow).SprintfFunc()
-	// yellowBold  = color.New(color.FgYellow, color.Bold).SprintfFunc()
-	green     = color.New(color.FgGreen).SprintfFunc()
-	greenBold = color.New(color.FgGreen, color.Bold).SprintfFunc()
-	red       = color.New(color.FgRed).SprintfFunc()
-	// redBold     = color.New(color.FgRed, color.Bold).SprintfFunc()
-	cyan = color.New(color.FgCyan).SprintfFunc()
-	// cyanBold    = color.New(color.FgCyan, color.Bold).SprintfFunc()
-	// magenta     = color.New(color.FgMagenta).SprintfFunc()
-	magentaBold = color.New(color.FgMagenta, color.Bold).SprintfFunc()
+	Bold        = color.New(color.Bold).SprintfFunc()
+	White       = color.New(color.FgWhite).SprintfFunc()
+	WhiteBold   = color.New(color.FgWhite, color.Bold).SprintfFunc()
+	Yellow      = color.New(color.FgYellow).SprintfFunc()
+	YellowBold  = color.New(color.FgYellow, color.Bold).SprintfFunc()
+	Green       = color.New(color.FgGreen).SprintfFunc()
+	GreenBold   = color.New(color.FgGreen, color.Bold).SprintfFunc()
+	Red         = color.New(color.FgRed).SprintfFunc()
+	RedBold     = color.New(color.FgRed, color.Bold).SprintfFunc()
+	Cyan        = color.New(color.FgCyan).SprintfFunc()
+	CyanBold    = color.New(color.FgCyan, color.Bold).SprintfFunc()
+	Magenta     = color.New(color.FgMagenta).SprintfFunc()
+	MagentaBold = color.New(color.FgMagenta, color.Bold).SprintfFunc()
+	Blue        = color.New(color.FgBlue).SprintfFunc()
+	BlueBold    = color.New(color.FgBlue, color.Bold).SprintfFunc()
 )
 
 func NewCLILogger(logLevel int, wherePad int) *CLILogger {
@@ -98,21 +100,21 @@ func (c *CLILoggerExec) Prefix() string {
 	case 6: // TRACE
 	case 5: // DEBUG
 	case 4: // INFO
-		whereString = cyan(whereString)
+		whereString = Cyan(whereString)
 	case 3: // WARN
-		whereString = yellow(whereString)
+		whereString = Yellow(whereString)
 	case 2: // ERROR
-		whereString = red(whereString)
+		whereString = Red(whereString)
 	case 1: // FATAL
-		whereString = red(whereString)
+		whereString = Red(whereString)
 	case 0: // PANIC
-		whereString = red(whereString)
+		whereString = Red(whereString)
 	case -1: // Highlight
-		whereString = green(whereString)
+		whereString = Green(whereString)
 	case -2: // Success
-		whereString = greenBold(whereString)
+		whereString = GreenBold(whereString)
 	case -3: // Announce
-		whereString = magentaBold(whereString)
+		whereString = MagentaBold(whereString)
 	default:
 	}
 
@@ -122,11 +124,11 @@ func (c *CLILoggerExec) Prefix() string {
 func (c *CLILoggerExec) Msgf(format string, v ...interface{}) {
 	switch {
 	case c.level == -1: // Highlight
-		fmt.Printf("%s %s\n", c.Prefix(), green(format, v...))
+		fmt.Printf("%s %s\n", c.Prefix(), Green(format, v...))
 	case c.level == -2: // Success
-		fmt.Printf("%s %s\n", c.Prefix(), greenBold(format, v...))
+		fmt.Printf("%s %s\n", c.Prefix(), GreenBold(format, v...))
 	case c.level == -3: // Announce
-		fmt.Printf("%s %s\n", c.Prefix(), magentaBold(format, v...))
+		fmt.Printf("%s %s\n", c.Prefix(), MagentaBold(format, v...))
 	default:
 		if c.threshold >= c.level {
 			newFormat := fmt.Sprintf("%s %s\n", c.Prefix(), format)
