@@ -1,118 +1,138 @@
 package logger
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/fatih/color"
 )
 
-var cliLogLevel = 3
-
-func NewCLILogger(logLevel string) {
-	if logLevel == "" {
-		cliLogLevel = 3
-		return
-	}
-
-	switch logLevel {
-	case "TRACE":
-		cliLogLevel = 6
-	case "DEBUG":
-		cliLogLevel = 5
-	case "INFO":
-		cliLogLevel = 4
-	case "WARN":
-		cliLogLevel = 3
-	case "ERROR":
-		cliLogLevel = 2
-	case "FATAL":
-		cliLogLevel = 1
-	case "PANIC":
-		cliLogLevel = 0
-	}
+type CLILogger struct {
+	logLevel int
+	wherePad int
 }
 
-func Tracef(format string, v ...interface{}) {
-	if cliLogLevel >= 6 {
-		fmt.Printf(format+"\n", v...)
-	}
+type CLILoggerExec struct {
+	where     string
+	wherePad  int
+	level     int
+	threshold int
 }
 
-func Debugf(format string, v ...interface{}) {
-	if cliLogLevel >= 5 {
-		fmt.Printf(format+"\n", v...)
+var (
+	// bold        = color.New(color.Bold).SprintfFunc()
+	// white       = color.New(color.FgWhite).SprintfFunc()
+	// whiteBold   = color.New(color.FgWhite, color.Bold).SprintfFunc()
+	yellow = color.New(color.FgYellow).SprintfFunc()
+	// yellowBold  = color.New(color.FgYellow, color.Bold).SprintfFunc()
+	green     = color.New(color.FgGreen).SprintfFunc()
+	greenBold = color.New(color.FgGreen, color.Bold).SprintfFunc()
+	red       = color.New(color.FgRed).SprintfFunc()
+	// redBold     = color.New(color.FgRed, color.Bold).SprintfFunc()
+	cyan = color.New(color.FgCyan).SprintfFunc()
+	// cyanBold    = color.New(color.FgCyan, color.Bold).SprintfFunc()
+	// magenta     = color.New(color.FgMagenta).SprintfFunc()
+	magentaBold = color.New(color.FgMagenta, color.Bold).SprintfFunc()
+)
+
+func NewCLILogger(logLevel int, wherePad int) *CLILogger {
+	cliLogger := CLILogger{
+		logLevel: logLevel,
+		wherePad: wherePad,
 	}
+	return &cliLogger
 }
 
-func Infof(format string, v ...interface{}) {
-	if cliLogLevel >= 4 {
-		code := color.New(color.FgCyan)
-		code.Printf(format+"\n", v...)
-	}
+func (c *CLILogger) Trace(where string) *CLILoggerExec {
+	return &CLILoggerExec{where: where, threshold: c.logLevel, level: 6, wherePad: c.wherePad}
 }
 
-func Warnf(format string, v ...interface{}) {
-	if cliLogLevel >= 3 {
-		code := color.New(color.FgYellow, color.Bold)
-		code.Printf(format+"\n", v...)
-	}
+func (c *CLILogger) Debug(where string) *CLILoggerExec {
+	return &CLILoggerExec{where: where, threshold: c.logLevel, level: 5, wherePad: c.wherePad}
 }
 
-func MinorSuccessf(format string, v ...interface{}) {
-	if cliLogLevel >= 2 {
-		code := color.New(color.FgGreen)
-		code.Printf(format+"\n", v...)
-	}
+func (c *CLILogger) Info(where string) *CLILoggerExec {
+	return &CLILoggerExec{where: where, threshold: c.logLevel, level: 4, wherePad: c.wherePad}
 }
 
-func Successf(format string, v ...interface{}) {
-	if cliLogLevel >= 2 {
-		code := color.New(color.FgGreen, color.Bold)
-		code.Printf(format+"\n", v...)
-	}
+func (c *CLILogger) Warn(where string) *CLILoggerExec {
+	return &CLILoggerExec{where: where, threshold: c.logLevel, level: 3, wherePad: c.wherePad}
 }
 
-func Announcef(format string, v ...interface{}) {
-	if cliLogLevel >= 2 {
-		code := color.New(color.FgCyan, color.Bold)
-		code.Printf(format+"\n", v...)
-	}
+func (c *CLILogger) Error(where string) *CLILoggerExec {
+	return &CLILoggerExec{where: where, threshold: c.logLevel, level: 2, wherePad: c.wherePad}
 }
 
-func Errorf(format string, v ...interface{}) {
-	if cliLogLevel >= 2 {
-		code := color.New(color.FgRed, color.Bold)
-		code.Printf(format+"\n", v...)
-	}
+func (c *CLILogger) Fatal(where string) *CLILoggerExec {
+	return &CLILoggerExec{where: where, threshold: c.logLevel, level: 1, wherePad: c.wherePad}
 }
 
-func Fatalf(format string, v ...interface{}) {
-	if cliLogLevel >= 1 {
-		code := color.New(color.FgRed, color.Bold, color.Underline)
-		code.Printf(format+"\n", v...)
-	}
+func (c *CLILogger) Panic(where string) *CLILoggerExec {
+	return &CLILoggerExec{where: where, threshold: c.logLevel, level: 0, wherePad: c.wherePad}
 }
 
-func Panicf(format string, v ...interface{}) {
-	if cliLogLevel >= 0 {
-		code := color.New(color.FgRed, color.Bold, color.Underline)
-		code.Printf(format+"\n", v...)
-	}
+func (c *CLILogger) Highlight(where string) *CLILoggerExec {
+	return &CLILoggerExec{where: where, threshold: c.logLevel, level: -1, wherePad: c.wherePad}
 }
 
-func Questionf(format string, v ...interface{}) string {
-	reader := bufio.NewReader(os.Stdin)
+func (c *CLILogger) Success(where string) *CLILoggerExec {
+	return &CLILoggerExec{where: where, threshold: c.logLevel, level: -2, wherePad: c.wherePad}
+}
 
-	code := color.New(color.FgMagenta, color.Bold)
-	code.Printf(format+" : ", v...)
-	text, err := reader.ReadString('\n')
-	if err != nil {
-		Errorf("could not read input: %v", err)
+func (c *CLILogger) Announce(where string) *CLILoggerExec {
+	return &CLILoggerExec{where: where, threshold: c.logLevel, level: -3, wherePad: c.wherePad}
+}
+
+func (c *CLILoggerExec) Prefix() string {
+	whereString := c.where
+	if len(whereString) > c.wherePad {
+		whereString = whereString[:c.wherePad]
 	}
-	return text
+	if len(whereString) < c.wherePad {
+		for len(whereString) != c.wherePad {
+			whereString = " " + whereString
+		}
+	}
+
+	switch c.level {
+	case 6: // TRACE
+	case 5: // DEBUG
+	case 4: // INFO
+		whereString = cyan(whereString)
+	case 3: // WARN
+		whereString = yellow(whereString)
+	case 2: // ERROR
+		whereString = red(whereString)
+	case 1: // FATAL
+		whereString = red(whereString)
+	case 0: // PANIC
+		whereString = red(whereString)
+	case -1: // Highlight
+		whereString = green(whereString)
+	case -2: // Success
+		whereString = greenBold(whereString)
+	case -3: // Announce
+		whereString = magentaBold(whereString)
+	default:
+	}
+
+	return fmt.Sprintf("%s ›", whereString)
+}
+
+func (c *CLILoggerExec) Msgf(format string, v ...interface{}) {
+	switch {
+	case c.level == -1: // Highlight
+		fmt.Printf("%s %s\n", c.Prefix(), green(format, v...))
+	case c.level == -2: // Success
+		fmt.Printf("%s %s\n", c.Prefix(), greenBold(format, v...))
+	case c.level == -3: // Announce
+		fmt.Printf("%s %s\n", c.Prefix(), magentaBold(format, v...))
+	default:
+		if c.threshold >= c.level {
+			newFormat := fmt.Sprintf("%s %s\n", c.Prefix(), format)
+			fmt.Printf(newFormat, v...)
+		}
+	}
 }
 
 func Dump(v ...interface{}) {
